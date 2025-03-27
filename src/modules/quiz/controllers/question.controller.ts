@@ -20,6 +20,9 @@ export class QuestionController {
   @UsePipes(ValidationPipe)
   async saveQuestion(@Body() question: CreateQuestionDto): Promise<Question> {
     const quiz = await this.quizService.getQuizById(question.quizId);
-    return this.questionService.createQuestion(question, quiz);
+    if (!quiz) {
+      throw new Error(`Quiz with id ${question.quizId} not found`);
+    }
+    return await this.questionService.createQuestion(question, quiz);
   }
 }

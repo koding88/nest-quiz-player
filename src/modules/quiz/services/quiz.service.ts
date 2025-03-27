@@ -10,14 +10,18 @@ export class QuizService {
     @InjectRepository(Quiz) private readonly quizRepository: Repository<Quiz>,
   ) {}
 
-  async getAllQuiz() {
-    return await this.quizRepository.find();
+  async getAllQuiz(): Promise<Quiz[]> {
+    return await this.quizRepository
+      .createQueryBuilder('q')
+      .leftJoinAndSelect('q.questions', 'qt')
+      .leftJoinAndSelect('qt.options', 'o')
+      .getMany();
   }
 
   async getQuizById(id: number): Promise<Quiz> {
     const quiz = await this.quizRepository.findOne({
       where: { id },
-      relations: ['questions'],
+      relations: ['questions', 'questions.options'],
     });
     if (!quiz) {
       throw new Error(`Quiz with id ${id} not found`);

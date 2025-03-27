@@ -12,15 +12,26 @@ export class QuestionService {
     private readonly questionRepository: Repository<Question>,
   ) {}
 
+  async findQuestionById(id: number): Promise<Question> {
+    const question = await this.questionRepository.findOne({
+      where: { id },
+      relations: ['quiz', 'options'],
+    });
+    if (!question) {
+      throw new Error(`question with id ${id} not found`);
+    }
+    return question;
+  }
+
   async createQuestion(
     question: CreateQuestionDto,
     quiz: Quiz,
   ): Promise<Question> {
     const newQuestion = await this.questionRepository.save({
       question: question.question,
+      quiz: quiz,
     });
 
-    quiz.questions = [...quiz.questions, newQuestion];
     return newQuestion;
   }
 }
